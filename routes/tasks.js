@@ -1,16 +1,21 @@
-var express = require('express');
-var router = express.Router();
+let express = require('express');
+let router = express.Router();
 const { tasksModel } = require("../db")
 let cron = require('node-cron');
+let FCM = require('fcm-node');
 let moment = require('moment');
 let x = null;
 
+let serverKey = 'YOURSERVERKEYHERE'; //put your server key here
+let fcm = new FCM(serverKey);
 /* GET tasks listing. */
 router.get('/', (req, res) => {
-  tasksModel.findAll().then((tasks) => {
+  tasksModel.findAll({
+    order: [[ 'jobDate', 'DESC' ]]
+  }).then((tasks) => {
     res.json({
-      status : "success",
-      data : tasks
+      status: "success",
+      data: tasks
   })
   tasksModel.findAll().then((tasks) => {
     let dateTest = moment()
@@ -18,6 +23,19 @@ router.get('/', (req, res) => {
     let dayNow = dateTest.day()
     let taskData = tasks.map((item) => item.toJSON())
     taskData.map((task) => {
+      let message = { //this may var according to the message type (single recipient, multicast, topic, et cetera)
+        to: 'registration_token',
+        notification: {
+          title: task.title,
+          body: task.subTitle,
+          sound: true,
+        },
+        data: {  //you can send only notification or only data(or include both)
+          my_key: 'my value',
+          my_another_key: 'my another value'
+        }
+      };
+      console.log('task', task)
       let taskSecond  = moment(task.jobDate).second();
       let taskMinutes = moment(task.jobDate).minutes();
       let taskHour    = moment(task.jobDate).hour();
@@ -27,8 +45,17 @@ router.get('/', (req, res) => {
         cron.schedule(`${taskSecond} ${taskMinutes} ${taskHour} * * *`, () => {
           if(x != "delivered") {
             console.log("run!")
-            sendNotification(message);
+            fcm.send(message, (err, response) => {
+              if (err) {
+                console.log("Something has gone wrong!");
+              } else {
+                console.log("Successfully sent with response: ", response);
+              }
+            });
             x = "delivered";
+            setTimeout(() => {
+              x = null;
+            }, 500);
           }
       }, {
             timezone: 'Europe/Istanbul'
@@ -41,7 +68,7 @@ router.get('/', (req, res) => {
 
 router.post('/', (req, res, next) => {
   const { title, subTitle, jobDate } = req.body;
-  if(title && subTitle && jobDate ) {
+  if(title && subTitle && jobDate) {
     tasksModel.create(req.body).then((data) => {
       if(data) res.json({ status: "success", data: data });
     })
