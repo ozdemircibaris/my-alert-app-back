@@ -23,7 +23,7 @@ router.get('/', (req, res) => {
     let taskData = tasks.map((item) => item.toJSON())
     taskData.map((task) => {
       let message = { //this may var according to the message type (single recipient, multicast, topic, et cetera)
-        to: 'registration_token',
+        to: process.env.PHONE_KEY || 'registration_token',
         notification: {
           title: task.title,
           body: task.subTitle,
