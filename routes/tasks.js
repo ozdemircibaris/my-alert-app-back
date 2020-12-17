@@ -18,9 +18,6 @@ router.get('/', (req, res) => {
       data: tasks
   })
   tasksModel.findAll().then((tasks) => {
-    let dateTest = moment()
-    let monthNow = dateTest.month()
-    let dayNow = dateTest.day()
     let taskData = tasks.map((item) => item.toJSON())
     taskData.map((task) => {
       let message = { //this may var according to the message type (single recipient, multicast, topic, et cetera)
@@ -41,8 +38,7 @@ router.get('/', (req, res) => {
       let taskHour    = moment(task.jobDate).hour();
       let taskDay     = moment(task.jobDate).day();
       let taskMonth   = moment(task.jobDate).month();
-      if(monthNow == taskMonth && dayNow == taskDay) {
-        cron.schedule(`${taskSecond} ${taskMinutes} ${taskHour} * * *`, () => {
+        cron.schedule(`${taskSecond} ${taskMinutes} ${taskHour} ${taskDay} ${taskMonth} *`, () => {
           if(x != "delivered") {
             console.log("run!")
             fcm.send(message, (err, response) => {
@@ -60,7 +56,6 @@ router.get('/', (req, res) => {
       }, {
             timezone: 'Europe/Istanbul'
           });
-        }
       })
     })
   })
