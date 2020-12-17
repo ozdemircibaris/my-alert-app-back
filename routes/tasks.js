@@ -8,7 +8,6 @@ let x = null;
 let dotenv = require('dotenv');
 dotenv.config()
 
-console.log('process.env.deneme', process.env.deneme)
 let serverKey = process.env.FIREBASE_SERVER_KEY || 'YOURSERVERKEYHERE'; //put your server key here
 let fcm = new FCM(serverKey);
 /* GET tasks listing. */
