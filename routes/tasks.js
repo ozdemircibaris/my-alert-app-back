@@ -34,7 +34,7 @@ router.get('/', (req, res) => {
           my_another_key: 'my another value'
         }
       };
-      console.log('task', task)
+
       let taskSecond  = moment(task.jobDate).second();
       let taskMinutes = moment(task.jobDate).minutes();
       let taskHour    = moment(task.jobDate).hour();
