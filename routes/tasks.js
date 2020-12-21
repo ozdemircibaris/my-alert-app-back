@@ -9,10 +9,6 @@ let x = null;
 let dotenv = require('dotenv');
 dotenv.config()
 
-
-let date = new Date()
-console.log(moment().month())
-
 let serverKey = process.env.FIREBASE_SERVER_KEY || 'YOURSERVERKEYHERE'; //put your server key here
 let fcm = new FCM(serverKey);
 /* GET tasks listing. */
@@ -45,7 +41,7 @@ router.get('/', (req, res) => {
       let taskHour    = moment(task.jobDate).hour();
       let taskDay     = moment(task.jobDate).date();
       let taskMonth   = moment(task.jobDate).month();
-      console.log({ taskMonth, taskDay, taskHour, taskMinutes,taskSecond })
+
         cron.schedule(`${taskSecond} ${taskMinutes} ${taskHour} ${taskDay} ${taskMonth + 1} *`, () => {
           if(x != "delivered") {
             console.log("run!")
